@@ -1,4 +1,18 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('auth')
-export class AuthController {}
+@ApiTags("Auth")
+export class AuthController {
+    constructor(
+        private authService: AuthService
+    ) { }
+
+    @Get("seed-admin") 
+    seedAdmin() {
+        return this.authService.seedAdmin();
+    }
+
+
+}
