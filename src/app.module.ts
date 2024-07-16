@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { SharedModule } from './shared/shared.module';
+import { MailerModule } from './mailer/mailer.module';
 
 @Module({
   imports: [
@@ -13,7 +14,8 @@ import { SharedModule } from './shared/shared.module';
     ConfigModule.forRoot({isGlobal: true}),
     DatabaseModule,
     SharedModule,
-    AuthModule
+    AuthModule,
+    MailerModule
   ],
   controllers: [AppController],
   providers: [AppService],
