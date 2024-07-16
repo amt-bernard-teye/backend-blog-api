@@ -144,3 +144,35 @@ export const swaggerRequestPasswordResetValidationResponse = {
         }
     }
 }
+
+export const swaggerResetPasswordSuccessResponse = {
+    description: "OK",
+    status: 200,
+    content: {
+        "application/json": {
+            schema: {
+                type: "object",
+                example: {
+                    message: "Successfully reset your password"
+                }
+            }
+        }
+    }
+}
+
+export const swaggerResetPasswordValidationResponse = {
+    description: "Validation failed",
+    status: 400,
+    content: {
+        "application/json": {
+            schema: {
+                type: "object",
+                example: {
+                    message: "Passwords do not match each other",
+                    error: "Bad Request",
+                    statusCode: 400
+                }
+            }
+        }
+    }
+}

@@ -4,7 +4,7 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { Response } from 'express';
 
-import { swaggerEmailConfirmationSuccessResponse, swaggerEmailConfirmationValidationResponse, swaggerLoginSuccessResponse, swaggerLoginValidationResponse, swaggerRegisterSuccessResponse, swaggerRegisterValidationResponse, swaggerRequestPasswordResetSuccessResponse, swaggerRequestPasswordResetValidationResponse } from './auth.swagger';
+import { swaggerEmailConfirmationSuccessResponse, swaggerEmailConfirmationValidationResponse, swaggerLoginSuccessResponse, swaggerLoginValidationResponse, swaggerRegisterSuccessResponse, swaggerRegisterValidationResponse, swaggerRequestPasswordResetSuccessResponse, swaggerRequestPasswordResetValidationResponse, swaggerResetPasswordSuccessResponse, swaggerResetPasswordValidationResponse } from './auth.swagger';
 import { swaggerInternalResponse } from 'src/shared/internal.swagger';
 import { AuthToken } from './auth-token';
 import { ResponseMessage } from 'src/shared/decorators/response-message.decorator';
@@ -12,6 +12,7 @@ import { DataMessageInterceptor } from 'src/shared/interceptors/data-message.int
 import { RegisterDto } from './dto/register.dto';
 import { MessageOnlyInterceptor } from 'src/shared/interceptors/message-only.interceptor';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
 @ApiTags("Auth")
@@ -78,5 +79,18 @@ export class AuthController {
     @ApiResponse(swaggerRequestPasswordResetValidationResponse)
     requestPasswordReset(@Body(ValidationPipe) body: RequestPasswordResetDto) {
         return this.authService.requestPasswordReset(body.email);
+    }
+
+    @Post("reset-password")
+    @UseInterceptors(MessageOnlyInterceptor)
+    @ApiResponse(swaggerInternalResponse)
+    @ApiResponse(swaggerResetPasswordValidationResponse)
+    @ApiResponse(swaggerResetPasswordSuccessResponse)
+    resetPassword(@Body(ValidationPipe) body: ResetPasswordDto, @Query("token") token: string) {
+        if (body.password !== body.confirmPassword) {
+            throw new BadRequestException("Passwords do not match each other");
+        }
+
+        return this.authService.resetPassword(token, body.password);
     }
 }

@@ -158,4 +158,24 @@ export class AuthService {
             throwError(error);
         }
     }
+
+    async resetPassword(token: string, pass: string) {
+        try {
+            const result = await this.jwtService.verify(token, {secret: this.secretKey});
+            const existingUser = await this.userRepo.find(result.sub);
+
+            if (!existingUser) {
+                throw new BadRequestException("Invalid token");
+            }
+
+            const hashedPassword = await bcryptjs.hash(pass, 10);
+            existingUser.password = hashedPassword;
+            await this.userRepo.update(existingUser);
+
+            return "Successfully reset your password";
+        }
+        catch(error) {
+            throwError(error);
+        }
+    }
 }
