@@ -112,3 +112,35 @@ export const swaggerEmailConfirmationValidationResponse = {
         }
     }
 }
+
+export const swaggerRequestPasswordResetSuccessResponse = {
+    description: "OK",
+    status: 200,
+    content: {
+        "application/json": {
+            schema: {
+                type: "object",
+                example: {
+                    message: "Please check your email to complete your reset process"
+                }
+            }
+        }
+    }
+}
+
+export const swaggerRequestPasswordResetValidationResponse = {
+    description: "Validation failed",
+    status: 400,
+    content: {
+        "application/json": {
+            schema: {
+                type: "object",
+                example: {
+                    message: "Email not recognized, please check your email and try again",
+                    error: "Bad Request",
+                    statusCode: 400
+                }
+            }
+        }
+    }
+}

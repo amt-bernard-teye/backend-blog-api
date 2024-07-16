@@ -4,14 +4,14 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { Response } from 'express';
 
-import { swaggerEmailConfirmationSuccessResponse, swaggerEmailConfirmationValidationResponse, swaggerLoginSuccessResponse, swaggerLoginValidationResponse, swaggerRegisterSuccessResponse, swaggerRegisterValidationResponse } from './auth.swagger';
+import { swaggerEmailConfirmationSuccessResponse, swaggerEmailConfirmationValidationResponse, swaggerLoginSuccessResponse, swaggerLoginValidationResponse, swaggerRegisterSuccessResponse, swaggerRegisterValidationResponse, swaggerRequestPasswordResetSuccessResponse, swaggerRequestPasswordResetValidationResponse } from './auth.swagger';
 import { swaggerInternalResponse } from 'src/shared/internal.swagger';
 import { AuthToken } from './auth-token';
 import { ResponseMessage } from 'src/shared/decorators/response-message.decorator';
 import { DataMessageInterceptor } from 'src/shared/interceptors/data-message.interceptor';
 import { RegisterDto } from './dto/register.dto';
 import { MessageOnlyInterceptor } from 'src/shared/interceptors/message-only.interceptor';
-import { IsEmail } from 'class-validator';
+import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
 
 @Controller('auth')
 @ApiTags("Auth")
@@ -69,5 +69,14 @@ export class AuthController {
         }
 
         return this.authService.emailConfirmation(token);
+    }
+
+    @Post("forgot-password")
+    @UseInterceptors(MessageOnlyInterceptor)
+    @ApiResponse(swaggerInternalResponse)
+    @ApiResponse(swaggerRequestPasswordResetSuccessResponse)
+    @ApiResponse(swaggerRequestPasswordResetValidationResponse)
+    requestPasswordReset(@Body(ValidationPipe) body: RequestPasswordResetDto) {
+        return this.authService.requestPasswordReset(body.email);
     }
 }

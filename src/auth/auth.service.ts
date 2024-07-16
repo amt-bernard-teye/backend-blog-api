@@ -9,6 +9,7 @@ import { User } from 'src/shared/types/user.type';
 import { throwError } from 'src/shared/util/throw-exception.util';
 import { AuthToken } from './auth-token';
 import { RegisterAccountService } from 'src/mailer/service/register-account.service';
+import { ForgotPasswordService } from 'src/mailer/service/forgot-password.service';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +19,8 @@ export class AuthService {
         private userRepo: UserRepository,
         private configService: ConfigService,
         private jwtService: JwtService,
-        private registerService: RegisterAccountService
+        private registerService: RegisterAccountService,
+        private forgotPasswordService: ForgotPasswordService
     ) {
         this.secretKey = this.configService.get("SECRET_KEY");
     }
@@ -106,7 +108,6 @@ export class AuthService {
             });
 
             const token = this.jwtService.sign({sub: user.id}, {secret: this.secretKey});
-
             await this.registerService.sendMail({ email, name, token });
 
             return "Please check your email to complete the registration process";
@@ -133,6 +134,28 @@ export class AuthService {
         }
         catch(error) {
             throw new BadRequestException("Invalid token");
+        }
+    }
+
+    async requestPasswordReset(email: string) {
+        try {
+            const existingUser = await this.userRepo.find(email);
+
+            if (!existingUser) {
+                throw new BadRequestException("Email not recognized, please check your email and try again");
+            }
+
+            const token = this.jwtService.sign({sub: existingUser.id}, {secret: this.secretKey});
+            await this.forgotPasswordService.sendMail({
+                name: existingUser.name,
+                email,
+                token
+            });
+
+            return "Please check your email to complete your reset process";
+        }
+        catch(error) {
+            throwError(error);
         }
     }
 }
