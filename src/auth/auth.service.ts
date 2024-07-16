@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { AccountVerification, Role } from '@prisma/client';
@@ -73,11 +73,7 @@ export class AuthService {
     }
 
     private generateAccessAndRefreshToken(user: User) {
-        const accessTokenDuration = "15m";
-        const accessToken = this.jwtService.sign({
-            sub: user.id,
-            token: AuthToken.ACCESS_TOKEN
-        }, {secret: this.secretKey, expiresIn: accessTokenDuration});
+        const accessToken = this.generateAccessToken(user.id)
 
         const refreshTokenDuration = "30d";
         const refreshToken = this.jwtService.sign({
@@ -89,6 +85,14 @@ export class AuthService {
             accessToken, 
             refreshToken
         };
+    }
+
+    private generateAccessToken(id: string) {
+        const accessTokenDuration = "15m";
+        return this.jwtService.sign({
+            sub: id,
+            token: AuthToken.ACCESS_TOKEN
+        }, {secret: this.secretKey, expiresIn: accessTokenDuration});
     }
 
     async register(name: string, email: string, password: string) {
@@ -176,6 +180,18 @@ export class AuthService {
         }
         catch(error) {
             throwError(error);
+        }
+    }
+
+    async refreshAccessToken(refreshToken: string) {
+        try {
+            const result = await this.jwtService.verify(refreshToken, {secret: this.secretKey});
+            return {
+                token: this.generateAccessToken(result.sub)
+            };
+        }
+        catch(error) {
+            throw new UnauthorizedException("Access denied");
         }
     }
 }

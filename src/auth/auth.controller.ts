@@ -1,10 +1,10 @@
-import { BadRequestException, Body, Controller, Get, Post, Query, Res, UseInterceptors, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Post, Query, Req, Res, UseInterceptors, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
-import { swaggerEmailConfirmationSuccessResponse, swaggerEmailConfirmationValidationResponse, swaggerLoginSuccessResponse, swaggerLoginValidationResponse, swaggerRegisterSuccessResponse, swaggerRegisterValidationResponse, swaggerRequestPasswordResetSuccessResponse, swaggerRequestPasswordResetValidationResponse, swaggerResetPasswordSuccessResponse, swaggerResetPasswordValidationResponse } from './auth.swagger';
+import { swaggerEmailConfirmationSuccessResponse, swaggerEmailConfirmationValidationResponse, swaggerLoginSuccessResponse, swaggerLoginValidationResponse, swaggerRefreshTokenSuccessResponse, swaggerRefreshTokenValidationResponse, swaggerRegisterSuccessResponse, swaggerRegisterValidationResponse, swaggerRequestPasswordResetSuccessResponse, swaggerRequestPasswordResetValidationResponse, swaggerResetPasswordSuccessResponse, swaggerResetPasswordValidationResponse } from './auth.swagger';
 import { swaggerInternalResponse } from 'src/shared/internal.swagger';
 import { AuthToken } from './auth-token';
 import { ResponseMessage } from 'src/shared/decorators/response-message.decorator';
@@ -13,6 +13,7 @@ import { RegisterDto } from './dto/register.dto';
 import { MessageOnlyInterceptor } from 'src/shared/interceptors/message-only.interceptor';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { DataOnlyInterceptor } from 'src/shared/interceptors/data-only.interceptor';
 
 @Controller('auth')
 @ApiTags("Auth")
@@ -92,5 +93,14 @@ export class AuthController {
         }
 
         return this.authService.resetPassword(token, body.password);
+    }
+
+    @Get("refresh-token")
+    @ApiResponse(swaggerInternalResponse)
+    @ApiResponse(swaggerRefreshTokenSuccessResponse)
+    @ApiResponse(swaggerRefreshTokenValidationResponse)
+    refreshAccessToken(@Req() req: Request) {
+        const refreshToken = req.cookies[AuthToken.REFRESH_TOKEN];
+        return this.authService.refreshAccessToken(refreshToken);
     }
 }

@@ -176,3 +176,35 @@ export const swaggerResetPasswordValidationResponse = {
         }
     }
 }
+
+export const swaggerRefreshTokenSuccessResponse = {
+    description: "OK",
+    status: 200,
+    content: {
+        "application/json": {
+            schema: {
+                type: "object",
+                example: {
+                    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJBRDEiLCJ0b2tlbiI6ImFjYy10ay1lcyIsImlhdCI6MTcyMTEzNDg1NSwiZXhwIjoxNzIxMTM1NzU1fQ.qa_Cgf6gR50EBAco4gbR_EqOdAt6tRIwrjQPtjEnats"
+                }
+            }
+        }
+    }
+}
+
+export const swaggerRefreshTokenValidationResponse = {
+    description: "Validation failed",
+    status: 401,
+    content: {
+        "application/json": {
+            schema: {
+                type: "object",
+                example: {
+                    message: "Access denied",
+                    error: "Unauthorized Request",
+                    statusCode: 401
+                }
+            }
+        }
+    }
+}
