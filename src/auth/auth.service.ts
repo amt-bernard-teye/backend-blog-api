@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { Role } from '@prisma/client';
+import { AccountVerification, Role } from '@prisma/client';
 import * as bcryptjs from "bcryptjs";
 
 import { UserRepository } from 'src/database/repository/user.repository';
@@ -113,6 +113,26 @@ export class AuthService {
         }
         catch(error) {
             throwError(error);
+        }
+    }
+
+    async emailConfirmation(token: string) {
+        try {
+            const result = await this.jwtService.verify(token, {secret: this.secretKey});
+            
+            const existingUser = await this.userRepo.find(result.sub);
+
+            if (!existingUser) {
+                throw new Error();
+            }
+
+            existingUser.accountVerification = AccountVerification.VERIFIED;
+            await this.userRepo.update(existingUser);
+
+            return "Email address successfully verified";
+        }
+        catch(error) {
+            throw new BadRequestException("Invalid token");
         }
     }
 }

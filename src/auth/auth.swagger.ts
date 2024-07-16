@@ -80,3 +80,35 @@ export const swaggerRegisterValidationResponse = {
         }
     }
 }
+
+export const swaggerEmailConfirmationSuccessResponse = {
+    description: "OK",
+    status: 200,
+    content: {
+        "application/json": {
+            schema: {
+                type: "object",
+                example: {
+                    message: "Email address successfully verified",
+                }
+            }
+        }
+    }
+}
+
+export const swaggerEmailConfirmationValidationResponse = {
+    description: "Validation failed",
+    status: 400,
+    content: {
+        "application/json": {
+            schema: {
+                type: "object",
+                example: {
+                    message: "Invalid token",
+                    error: "Bad Request",
+                    statusCode: 400
+                }
+            }
+        }
+    }
+}
