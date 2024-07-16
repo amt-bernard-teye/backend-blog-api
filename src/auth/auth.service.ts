@@ -8,6 +8,7 @@ import { UserRepository } from 'src/database/repository/user.repository';
 import { User } from 'src/shared/types/user.type';
 import { throwError } from 'src/shared/util/throw-exception.util';
 import { AuthToken } from './auth-token';
+import { RegisterAccountService } from 'src/mailer/service/register-account.service';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +17,8 @@ export class AuthService {
     constructor (
         private userRepo: UserRepository,
         private configService: ConfigService,
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        private registerService: RegisterAccountService
     ) {
         this.secretKey = this.configService.get("SECRET_KEY");
     }
@@ -85,5 +87,32 @@ export class AuthService {
             accessToken, 
             refreshToken
         };
+    }
+
+    async register(name: string, email: string, password: string) {
+        try {
+            const existingUser = await this.userRepo.find(email);
+
+            if (existingUser) {
+                throw new BadRequestException("Email already exist");
+            }
+
+            const hashedPassword = await bcryptjs.hash(password, 10);
+            const user = await this.userRepo.add({
+                name: name,
+                email,
+                password: hashedPassword,
+                role: Role.READER,
+            });
+
+            const token = this.jwtService.sign({sub: user.id}, {secret: this.secretKey});
+
+            await this.registerService.sendMail({ email, name, token });
+
+            return "Please check your email to complete the registration process";
+        }
+        catch(error) {
+            throwError(error);
+        }
     }
 }

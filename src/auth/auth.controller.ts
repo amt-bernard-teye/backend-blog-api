@@ -1,14 +1,17 @@
-import { Body, Controller, Get, Post, Res, UseInterceptors, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Post, Res, UseInterceptors, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { Response } from 'express';
 
-import { swaggerLoginSuccessResponse, swaggerLoginValidationResponse } from './auth.swagger';
+import { swaggerLoginSuccessResponse, swaggerLoginValidationResponse, swaggerRegisterSuccessResponse, swaggerRegisterValidationResponse } from './auth.swagger';
 import { swaggerInternalResponse } from 'src/shared/internal.swagger';
 import { AuthToken } from './auth-token';
 import { ResponseMessage } from 'src/shared/decorators/response-message.decorator';
 import { DataMessageInterceptor } from 'src/shared/interceptors/data-message.interceptor';
+import { RegisterDto } from './dto/register.dto';
+import { MessageOnlyInterceptor } from 'src/shared/interceptors/message-only.interceptor';
+import { IsEmail } from 'class-validator';
 
 @Controller('auth')
 @ApiTags("Auth")
@@ -40,5 +43,18 @@ export class AuthController {
             token: accessToken,
             user: result.user
         };
+    }
+
+    @Post("register")
+    @ApiResponse(swaggerInternalResponse)
+    @ApiResponse(swaggerRegisterSuccessResponse)
+    @ApiResponse(swaggerRegisterValidationResponse)
+    @UseInterceptors(MessageOnlyInterceptor)
+    register(@Body(ValidationPipe) body: RegisterDto) {
+        if (body.password !== body.confirmPassword) {
+            throw new BadRequestException("Passwords do not match each other");
+        }
+
+        return this.authService.register(body.name, body.email, body.password);
     }
 }
